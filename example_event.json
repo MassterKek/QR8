@@ -1,0 +1,41 @@
+{
+    "title": "Coffee With The Pastor",
+    "date": {
+      "start_date": "Oct 10",
+      "when": "Sun, Oct 10, 7:30 – 9:00 PM"
+    },
+    "address": [
+      "Glasgow Rd",
+      "Bella Vista, AR"
+    ],
+    "link": "https://m.facebook.com/events/583067572841692",
+    "event_location_map": {
+      "image": "https://www.google.com/maps/vt/data=vHUs5bBLYpopZck-_0BErbvD4BZ4Xr59YAJfk6q_SSsAJlJKEHO-WYF969tKRGe16IZ3JSk4eg",
+      "link": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x87c9010d7321ba49:0x98ccd6ab44ef3de7?sa=X&hl=en",
+      "serpapi_link": "https://serpapi.com/search.json?data=%214m2%213m1%211s0x87c9010d7321ba49%3A0x98ccd6ab44ef3de7&engine=google_maps&google_domain=google.com&hl=en&q=Coffee&type=place"
+    },
+    "description": "Coffee With The Pastor Hosted By Highlands Church of Bella Vista. Event starts at Sun Oct 10 2021 at 02:30 pm and happening at Bella Vista., Do you want to know more about Highlands Church? Come...",
+    "ticket_info": [
+      {
+        "source": "Facebook",
+        "link": "https://m.facebook.com/events/583067572841692",
+        "link_type": "more info"
+      },
+      {
+        "source": "AllEvents.in",
+        "link": "https://allevents.in/mobile/amp-event.php?event_id=200021659531053",
+        "link_type": "more info"
+      },
+      {
+        "source": "Stay Happening",
+        "link": "https://stayhappening.com/e/coffee-with-the-pastor-E2ISTYJKMA3",
+        "link_type": "more info"
+      },
+      {
+        "source": "Parkbench",
+        "link": "https://parkbench.com/event/coffee-with-the-pastor-8",
+        "link_type": "more info"
+      }
+    ],
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQczrjbDANbsxv5mlKj4JLqKz7a2fbJfX5Zb4PA026l7NLgckTprShZkTCN5g&s=10"
+  }
