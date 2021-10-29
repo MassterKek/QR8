@@ -19,17 +19,14 @@ const findQuery = (request, response, next) => {
         response.status(422).json({ errors: errors.array() });
         return;
     }
-    
     const { q, loc } = request.body;
     const q_lower = q.toLowerCase();
     const loc_lower = loc.toLowerCase();
-
-    pool.query('SELECT * FROM QUERY WHERE q = $1 AND loc = $2',[q_lower, loc_lower])
+    pool.query('SELECT * FROM QUERY WHERE q = $1 AND loc = $2', [q_lower, loc_lower])
     .then(results => response.status(200).json(results.rows[0]));
   } catch (error) {
     return next(error);
   }
-  
 }
 
 // Create new query with given q and loc
@@ -40,12 +37,10 @@ const createQuery = (request, response, next) => {
         response.status(422).json({ errors: errors.array() });
         return;
     }
-
     const { q, loc } = request.body;
     const q_lower = q.toLowerCase();
     const loc_lower = loc.toLowerCase();
-  
-    pool.query('INSERT INTO QUERY (q, loc) VALUES ($1, $2)',[q_lower, loc_lower])
+    pool.query('INSERT INTO QUERY (q, loc) VALUES ($1, $2)', [q_lower, loc_lower])
     .then(response.status(201).json({ status: 'success', message: 'Query created.' }));
   } catch (error) {
     return next(error);
@@ -61,7 +56,7 @@ const deleteQueryById = (request, response, next) => {
         return;
     }
     const { id } = request.body;
-    pool.query('DELETE FROM QUERY WHERE id = $1',[id])
+    pool.query('DELETE FROM QUERY WHERE id = $1', [id])
     .then(response.status(201).json({ status: 'success', message: 'Query deleted.' }));
   } catch (error) {
     return next(error);

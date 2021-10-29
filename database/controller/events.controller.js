@@ -23,7 +23,6 @@ const createEvent = (request, response, next) => {
             title, description, date_start, date_when, address, venue_name,
             venue_rating, venue_reviews, thumbnail, query_id
         } = request.body;
-    
         pool.query(
         `INSERT INTO EVENTS (
             title, description, date_start, date_when, address, venue_name,
@@ -45,11 +44,9 @@ const findEvent = (request, response, next) => {
             response.status(422).json({ errors: errors.array() });
             return;
         }
-
         const { q, loc } = request.body;
         const q_lower = q.toLowerCase();
         const loc_lower = loc.toLowerCase();
-
         pool.query('SELECT * FROM EVENTS WHERE query_id = (SELECT ID FROM QUERY WHERE q = $1 AND loc = $2)', 
         [q_lower, loc_lower])
         .then(results => response.status(200).json(results.rows));
