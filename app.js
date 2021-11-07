@@ -23,6 +23,7 @@ app.engine('handlebars', handlebars({
   defaultLayout: "index",
 }));
 
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

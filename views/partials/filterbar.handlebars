@@ -1,0 +1,34 @@
+<nav class="card col-md-2 d-none d-md-block bg-light sidebar">
+    <div class="sidebar-sticky">
+        <h2 class="card-title">Filters:</h1>
+        <form>
+            <div class="form-row">
+                <label class="col-sm-5 col-form-label col-form-label-lg">Distance:</label>
+                <div class="form-group  row-cols-2">
+                    <label for="from">from:</label>
+                    <input type="number" class="form-control" id="from">
+                </div>
+                <div class="form-group ">
+                    <label for="to">to:</label>
+                    <input type="number" class="form-control" id="to">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-8 col-form-label col-form-label-lg" for="covid">COVID-19 Rate:</label>
+                <select class="form-control" id="covid">
+                    <option>Low</option>
+                    <option>Average</option>
+                    <option>High</option>
+                </select>
+            </div>
+            <div class="form-row  row-cols-1">
+                <label class="col-sm-5 col-form-label col-form-label-lg">Date:</label>
+                <label for="before">Before:</label>
+                <input type="date" id="before">
+                <label for="after">After:</label>
+                <input type="date" id="after">
+            </div>
+            <button type="submit" class="btn btn-primary my-3">Submit</button>
+        </form>
+    </div>
+</nav>
