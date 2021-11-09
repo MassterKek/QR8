@@ -13,6 +13,8 @@ var usersRouter = require('./routes/users');
 var apiQueryRouter = require('./database/routes/db.query.routes');
 var apiEventsRouter = require('./database/routes/db.events.routes');
 
+var scraperRouter = require('./scraper/routes/scraper.events.routes');
+
 var app = express();
 
 // view engine setup
@@ -37,6 +39,7 @@ app.use('/users', usersRouter);
 // Internal API Routes
 app.use('/api/v1/query', apiQueryRouter);
 app.use('/api/v1/event', apiEventsRouter);
+app.use('/scraper/v1/event', scraperRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

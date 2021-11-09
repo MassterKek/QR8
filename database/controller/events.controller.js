@@ -1,11 +1,11 @@
-const { pool } = require('../db.config');
-const { validationResult } = require('express-validator/check');
-const { body } = require('express-validator/check');
+const { selectAllEvents, insertEvent, selectEvent } = require('../db.methods');
+const { validationResult } = require('express-validator');
+const { body } = require('express-validator');
 
 // Return all events from EVENTS table
 const getAllEvents = (request, response, next) => {
     try {
-        pool.query('SELECT * FROM EVENTS').then(results => response.status(200).json(results.rows));
+        selectAllEvents().then(results => response.status(200).json(results.rows));
     } catch (error) {
         return next(error);
     }
@@ -20,17 +20,11 @@ const createEvent = (request, response, next) => {
             return;
         }
         const { 
-            title, description, date_start, date_when, address, venue_name,
-            venue_rating, venue_reviews, thumbnail, query_id
+            title, description, date, address, venue, thumbnail, query_id
         } = request.body;
-        pool.query(
-        `INSERT INTO EVENTS (
-            title, description, date_start, date_when, address, venue_name,
-            venue_rating, venue_reviews, thumbnail, query_id) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-        [title, description, date_start, date_when, address, venue_name, 
-            venue_rating, venue_reviews, thumbnail, query_id]
-        ).then(response.status(201).json({ status: 'success', message: 'Event created.' }))
+        const values = [title, description, date.start_date, date.when, `${address[0]}, ${address[1]}`, venue.name, 
+            venue.rating, venue.reviews, thumbnail, query_id];
+        insertEvent(values).then(response.status(201).json({ status: 'success', message: 'Event created.' }))
     } catch (error) {
         return next(error);
     }
@@ -47,9 +41,7 @@ const findEvent = (request, response, next) => {
         const { q, loc } = request.body;
         const q_lower = q.toLowerCase();
         const loc_lower = loc.toLowerCase();
-        pool.query('SELECT * FROM EVENTS WHERE query_id = (SELECT ID FROM QUERY WHERE q = $1 AND loc = $2)', 
-        [q_lower, loc_lower])
-        .then(results => response.status(200).json(results.rows));
+        selectEvent([q_lower, loc_lower]).then(results => response.status(200).json(results.rows));
     } catch (error) {
         return next(error);
     }
@@ -61,12 +53,14 @@ const validateEvent = (method) => {
          return [ 
             body('title', 'title is empty').exists(),
             body('description', 'description is empty').exists(),
-            body('date_start', 'date_start is empty').exists(),
-            body('date_when', 'date_when is empty').exists(),
+            body('date', 'date is empty').exists(),
+            body('date.start_date', 'date start is empty').exists(),
+            body('date.when', 'date when is empty').exists(),
             body('address', 'address is empty').exists(),
-            body('venue_name', 'venue_name is empty').exists(),
-            body('venue_rating', 'venue_rating is empty').exists(),
-            body('venue_reviews', 'venue_reviews is empty').exists(),
+            body('venue', 'venue is empty').exists(),
+            body('venue.name', 'venue name is empty').exists(),
+            body('venue.rating', 'venue rating is empty').exists(),
+            body('venue.reviews', 'venue reviews is empty').exists(),
             body('thumbnail', 'thumbnail is empty').exists(),
             body('query_id', 'query_id is empty').exists(),
            ]   

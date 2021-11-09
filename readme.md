@@ -1,5 +1,16 @@
-### Database config
+### Installation requirements
 
-#### install postgresql v14 from https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+- install NodeJS
+- install heroku cli
+- install git
+- install postgresql v14 from https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
 
-#### create ENV variable DATABASE_URL = 'uri from heroku dashboard'
+### Env variables
+
+- set DATABASE_URL = 'uri from heroku dashboard'
+- set EVENTS_API_KEY = 'events search api key'
+
+### Run
+
+`npm install`
+`heroku local web`
