@@ -13,4 +13,9 @@ const getValues = (event, query_id) => {
         event.thumbnail, query_id];
 }
 
-module.exports = { isValidResponse, getValues };
+const parseAddress = (address) => {
+    const parsed = address.split(',');
+    return parsed.map(string => string.trim())
+};
+
+module.exports = { isValidResponse, getValues, parseAddress };

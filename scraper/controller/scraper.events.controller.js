@@ -63,7 +63,6 @@ const findEventsForQuery = (request, response, next) => {
     const { q, loc } = request.body;
     const q_lower = q.toLowerCase();
     const loc_lower = loc.toLowerCase();
-    console.log(`${q_lower}, ${loc_lower}`)
     selectQuery([ q_lower, loc_lower ])
     .then(queries => {
         if (queries.rows.length > 0) {
@@ -72,7 +71,6 @@ const findEventsForQuery = (request, response, next) => {
         } else {
             fetchAndReturnNewEvents(response, q_lower, loc);
         }
-        //response.status(400).json({ error: 'mighty errors' });
     }).catch((error) => {
         console.log(error);
         response.status(400).json({ error: error.message });
