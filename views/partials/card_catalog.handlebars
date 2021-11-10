@@ -1,37 +1,17 @@
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-    <div class="overflow-auto d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+<main role="main" class="col-md">
+    {{> sortbar}}
+    <div>
         <div class="row row-cols-3">
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
-            {{> card title='EVENT' date='12-22-21' location='100 Fake Ln, Boston, MA 02121' covid='High' weather='Partly Cloudy'}}
+            {{#each events}}
+                {{> card
+                    title=title
+                    date=date
+                    location=location
+                    covid=covid
+                    weather=weather
+                }}
+            {{/each}}
+            
         </div>
     </div>
 </div>
-<!--
- {{#each cards}}
-        {{> card
-            title=this.title
-            date=this.date
-            location=this.location
-            field1=this.covid
-            field2=this.weather
-        }}
-    {{/each}}
--->

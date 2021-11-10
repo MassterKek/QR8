@@ -1,31 +1,27 @@
-<nav class="card col-md-2 d-none d-md-block bg-light sidebar">
-    <div class="sidebar-sticky">
+<nav class="card col-sm-2 d-none d-xl-block bg-light sidebar">
+    <div>
         <h2 class="card-title">Filters:</h1>
         <form>
-            <div class="form-row">
-                <label class="col-sm-5 col-form-label col-form-label-lg">Distance:</label>
-                <div class="form-group  row-cols-2">
-                    <label for="from">from:</label>
-                    <input type="number" class="form-control" id="from">
-                </div>
-                <div class="form-group ">
-                    <label for="to">to:</label>
-                    <input type="number" class="form-control" id="to">
-                </div>
+            <h4>Distance:</h4>
+            <div class="distance input-group d-flex flex-row align-items-center py-2">
+                <input type="number" aria-label="min" min=0 placeholder="min..." class="form-control">
+                <label class="px-1">to</label>
+                <input type="number" aria-label="max" min=0 placeholder="max..." class="form-control">
+                 <label class="px-1">miles</label>
             </div>
-            <div class="form-group">
-                <label class="col-sm-8 col-form-label col-form-label-lg" for="covid">COVID-19 Rate:</label>
+            <div class="covid form-group py-2">
+                <h4>COVID-19 Rate:</h4>
                 <select class="form-control" id="covid">
                     <option>Low</option>
                     <option>Average</option>
                     <option>High</option>
                 </select>
             </div>
-            <div class="form-row  row-cols-1">
-                <label class="col-sm-5 col-form-label col-form-label-lg">Date:</label>
-                <label for="before">Before:</label>
+            <div class="date form-row row-cols-1 py-2">
+                <h4>Date:</h4>
+                <h6>Before:</h6>
                 <input type="date" id="before">
-                <label for="after">After:</label>
+                <h6>After:</h6>
                 <input type="date" id="after">
             </div>
             <button type="submit" class="btn btn-primary my-3">Submit</button>

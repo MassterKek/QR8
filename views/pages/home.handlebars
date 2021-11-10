@@ -1,9 +1,9 @@
 <!-- Implement Homepage HTML-->
 <!-- Base layout on movie site layouts-->
-QR8 Info Goes Here
 <div class="container-fluid">
     <div class="row">
         {{> filterbar}}
-        {{> card_catalog}}
+        {{{log events}}}
+        {{> card_catalog events=items}}
     </div>
 </div>    
