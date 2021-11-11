@@ -18,7 +18,7 @@ const deleteQuery = (values) => {
 }
 // PostgreSQL Queries for EVENTS table
 const selectAllEvents = () => {
-    return pool.query('SELECT * FROM EVENTS');
+    return pool.query('SELECT * FROM EVENTS ORDER BY date_when ASC');
 }
 
 const insertEvent = (values) => {
@@ -36,8 +36,12 @@ const selectEventsByQueryId = (values) => {
     return pool.query('SELECT * FROM EVENTS WHERE query_id = $1', values);
 }
 
+const truncateCovidData = () => {
+    return pool.query('TRUNCATE COVID_DATA');
+}
+
 const truncateEvents = () => {
-    return pool.query('TRUNCATE EVENTS');
+    return pool.query('TRUNCATE EVENTS CASCADE');
 }
 
 module.exports = { selectAllQueries, selectQuery, insertQuery, deleteQuery, selectAllEvents, insertEvent, selectEvent, selectEventsByQueryId, truncateEvents };

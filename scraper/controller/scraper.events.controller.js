@@ -69,7 +69,8 @@ const findEventsForQuery = (request, response, next) => {
             const query_id = queries.rows[0].id;
             returnExistingEvents(response, query_id);
         } else {
-            fetchAndReturnNewEvents(response, q_lower, loc);
+            response.status(200).json([]);
+            //fetchAndReturnNewEvents(response, q_lower, loc);
         }
     }).catch((error) => {
         console.log(error);
@@ -81,6 +82,7 @@ const findEventsForQuery = (request, response, next) => {
 const returnExistingEvents = (response, query_id) => {
     selectEventsByQueryId([ query_id ])
     .then(events => {
+        //console.log(events.rows[0]);
         response.status(200).json(events.rows);
     }).catch((error) => {
         console.log(error);
