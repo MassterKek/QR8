@@ -1,10 +1,11 @@
 require('dotenv').config();
 const constants = require('../scraper.events.config');
 const SerpApi = require('google-search-results-nodejs');
-const { selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery } = require('../../database/db.methods');
-const { isValidResponse, getValues } = require('../scraper.utils');
+const { selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery, insertCovidData } = require('../../database/db.methods');
+const { isValidResponse, getValues, getCovidValues, parseAddress } = require('../scraper.utils');
 const { validationResult } = require('express-validator');
 const { body } = require('express-validator');
+const axios = require('axios');
 
 /* IMPORTANT
  * Fetch events for every saved query using Google Events Search API
@@ -37,14 +38,36 @@ const searchAllCallback = function(data, query_id) {
             Array.prototype.forEach.call(data.events_results, (event) => {
                 if (isValidResponse(event)) {
                     const values = getValues(event, query_id);
-                    insertEvent(values);
+                    insertEvent(values).then((events) => {
+                        if (events.rows.length > 0) {
+                            const address = parseAddress(values[4]);
+                            getCovidDataForEvent(events.rows[0].id, address);
+                        }
+                    });
                 }
             });
         }
     } catch (error) {
         throw error;
-    }
+    };
 };
+
+// Get extended address information for event and get covid data for event using it's zipcode
+const getCovidDataForEvent = async (event_id, eventAddress) => {
+    axios({
+        method: 'get',
+        url: constants.YADDRESS_URL,
+        params: {'AddressLine1': `${eventAddress[0]}`, 'AddressLine2': `${eventAddress[1]}, ${eventAddress[2]}`},
+        headers: {'Accept': 'application/json'}
+    }).then((res) => {
+        if (res && res.data) {
+            const values = getCovidValues(res.data, 10, event_id);
+            insertCovidData(values);
+        }
+    }).catch((error) => {
+        console.log(error.message);
+    })
+}
 
 /* IMPORTANT
  * Return events for the query provided by the user 
@@ -82,7 +105,6 @@ const findEventsForQuery = (request, response, next) => {
 const returnExistingEvents = (response, query_id) => {
     selectEventsByQueryId([ query_id ])
     .then(events => {
-        //console.log(events.rows[0]);
         response.status(200).json(events.rows);
     }).catch((error) => {
         console.log(error);

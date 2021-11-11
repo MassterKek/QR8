@@ -28,6 +28,11 @@ const getValues = (event, query_id) => {
         event.thumbnail, query_id];
 }
 
+const getCovidValues = (address, covid_data, event_id) => {
+    return [address.AddressLine1, address.AddressLine2, address.Zip, address.Zip4, 
+        address.City, address.State, covid_data, event_id];
+}
+
 const parseDate = (eventDate) => {
     fields = eventDate.split(' ');
     date = `2021-${month[fields[0]]}-${fields[1]}`;
@@ -35,8 +40,9 @@ const parseDate = (eventDate) => {
 }
 
 const parseAddress = (address) => {
-    const parsed = address.split(',');
-    return parsed.map(string => string.trim())
+    let parsed = address.split(',');
+    parsed = parsed.map(string => string.trim())
+    return [parsed[parsed.length - 3], parsed[parsed.length - 2], parsed[parsed.length - 1]]
 };
 
-module.exports = { isValidResponse, getValues, parseDate, parseAddress };
+module.exports = { isValidResponse, getValues, parseDate, parseAddress, getCovidValues };

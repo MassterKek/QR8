@@ -1,6 +1,7 @@
 const { selectAllEvents, insertEvent, selectEvent } = require('../db.methods');
 const { validationResult } = require('express-validator');
 const { body } = require('express-validator');
+const { parseDate } = require('../../scraper/scraper.utils');
 
 // Return all events from EVENTS table
 const getAllEvents = (request, response, next) => {
@@ -22,9 +23,9 @@ const createEvent = (request, response, next) => {
         const { 
             title, description, date, address, venue, thumbnail, query_id
         } = request.body;
-        const values = [title, description, date.start_date, date.when, `${address[0]}, ${address[1]}`, venue.name, 
+        const values = [title, description, parseDate(date.start_date), date.when, `${address[0]}, ${address[1]}`, venue.name, 
             venue.rating, venue.reviews, thumbnail, query_id];
-        insertEvent(values).then(response.status(201).json({ status: 'success', message: 'Event created.' }))
+        insertEvent(values).then(results => response.status(200).json(results.rows))
     } catch (error) {
         return next(error);
     }
