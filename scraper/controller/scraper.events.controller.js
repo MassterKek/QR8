@@ -1,10 +1,11 @@
 require('dotenv').config();
 const constants = require('../scraper.events.config');
 const SerpApi = require('google-search-results-nodejs');
-const { selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery } = require('../../database/db.methods');
-const { isValidResponse, getValues } = require('../scraper.utils');
+const { selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery, insertCovidData } = require('../../database/db.methods');
+const { isValidResponse, getValues, getCovidValues, parseAddress, parseCovidRes } = require('../scraper.utils');
 const { validationResult } = require('express-validator');
 const { body } = require('express-validator');
+const axios = require('axios');
 
 /* IMPORTANT
  * Fetch events for every saved query using Google Events Search API
@@ -17,12 +18,15 @@ const updateAllSavedQueries = (request, response, next) => {
         const search = new SerpApi.GoogleSearch(process.env.EVENTS_API_KEY);
         truncateEvents();
         Array.prototype.forEach.call(results.rows, (query) => {
-            const params = {
-                'q': query.q,
-                'location': query.loc,
-                'engine': constants.ENGINE,
-            };
-            search.json(params, (data) => searchAllCallback(data, query.id));
+            for (let page_offset = 0; page_offset < constants.EVENT_PAGES; page_offset++) {
+                const params = {
+                    'q': query.q,
+                    'location': query.loc,
+                    'engine': constants.ENGINE,
+                    'start': page_offset,
+                };
+                search.json(params, (data) => searchAllCallback(data, query.id));
+            }
         });
         response.status(200).json({ status: 'success', message: 'events fetched' });
     }).catch((error) => {
@@ -37,12 +41,48 @@ const searchAllCallback = function(data, query_id) {
             Array.prototype.forEach.call(data.events_results, (event) => {
                 if (isValidResponse(event)) {
                     const values = getValues(event, query_id);
-                    insertEvent(values);
+                    insertEvent(values).then((events) => {
+                        if (events.rows.length > 0) {
+                            const address = parseAddress(values[4]);
+                            getExtendedEventInfo(events.rows[0].id, address);
+                        }
+                    });
                 }
             });
         }
     } catch (error) {
         throw error;
+    };
+};
+
+// Get extended address information for event and get covid data for event using it's zipcode
+const getExtendedEventInfo = async (event_id, eventAddress) => {
+    axios({
+        method: 'get',
+        url: constants.YADDRESS_URL,
+        params: {'AddressLine1': `${eventAddress[0]}`, 'AddressLine2': `${eventAddress[1]}, ${eventAddress[2]}`},
+        headers: {'Accept': 'application/json'}
+    }).then((addr_res) => {
+        getCovidDataForEvent(event_id, addr_res);
+    }).catch((error) => {
+        console.log(error.message);
+    });
+};
+
+// Get amount of positive covid cases for event zipcode
+const getCovidDataForEvent = async (event_id, addr_res) => {
+    if (addr_res && addr_res.data) {
+        axios({
+            method: 'get',
+            url: `${constants.COVID_DATA_URL}${addr_res.data.Zip}`,
+            headers: {'Accept': 'application/json'}
+        }).then((covid_res) => {
+            const positive_cases = parseCovidRes(covid_res);
+            const values = getCovidValues(addr_res.data, positive_cases, event_id);
+            insertCovidData(values);
+        }).catch((error) => {
+            console.log(error.message);
+        })
     }
 };
 
@@ -63,16 +103,15 @@ const findEventsForQuery = (request, response, next) => {
     const { q, loc } = request.body;
     const q_lower = q.toLowerCase();
     const loc_lower = loc.toLowerCase();
-    console.log(`${q_lower}, ${loc_lower}`)
     selectQuery([ q_lower, loc_lower ])
     .then(queries => {
         if (queries.rows.length > 0) {
             const query_id = queries.rows[0].id;
             returnExistingEvents(response, query_id);
         } else {
-            fetchAndReturnNewEvents(response, q_lower, loc);
+            response.status(200).json([]);
+            //fetchAndReturnNewEvents(response, q_lower, loc);
         }
-        //response.status(400).json({ error: 'mighty errors' });
     }).catch((error) => {
         console.log(error);
         response.status(400).json({ error: error.message });

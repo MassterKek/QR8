@@ -18,14 +18,14 @@ const deleteQuery = (values) => {
 }
 // PostgreSQL Queries for EVENTS table
 const selectAllEvents = () => {
-    return pool.query('SELECT * FROM EVENTS');
+    return pool.query('SELECT * FROM EVENTS LEFT JOIN COVID_DATA ON EVENTS.id = COVID_DATA.event_id');
 }
 
 const insertEvent = (values) => {
     return pool.query(`INSERT INTO EVENTS (
         title, description, date_start, date_when, address, venue_name,
         venue_rating, venue_reviews, thumbnail, query_id) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, values);
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`, values);
 }
 
 const selectEvent = (values) => {
@@ -33,11 +33,22 @@ const selectEvent = (values) => {
 }
 
 const selectEventsByQueryId = (values) => {
-    return pool.query('SELECT * FROM EVENTS WHERE query_id = $1', values);
+    return pool.query('SELECT * FROM EVENTS e LEFT JOIN COVID_DATA c ON e.id = c.event_id WHERE e.query_id = $1', values);
+}
+
+const truncateCovidData = () => {
+    return pool.query('TRUNCATE COVID_DATA');
 }
 
 const truncateEvents = () => {
-    return pool.query('TRUNCATE EVENTS');
+    return pool.query('TRUNCATE EVENTS CASCADE');
 }
 
-module.exports = { selectAllQueries, selectQuery, insertQuery, deleteQuery, selectAllEvents, insertEvent, selectEvent, selectEventsByQueryId, truncateEvents };
+const insertCovidData = (values) => {
+    return pool.query(`INSERT INTO COVID_DATA (
+        address_line_one, address_line_two, zip, zip4, city, state,
+        covid_cases, event_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`, values);
+}
+
+module.exports = { selectAllQueries, selectQuery, insertQuery, deleteQuery, selectAllEvents, insertEvent, selectEvent, selectEventsByQueryId, truncateEvents, insertCovidData };
