@@ -112,6 +112,7 @@ const findEventsForQuery = (request, response, next) => {
         }
     }).catch((error) => {
         console.log(error);
+        //response.status(200).json([]);
         response.status(400).json({ error: error.message });
     });
 };
@@ -183,7 +184,7 @@ const validateFetch = (method) => {
         case 'findEventsForQuery': {
          return [ 
             body('q', 'q is empty').exists(),
-            body('loc', 'loc is empty').exists(),
+            //body('loc', 'loc is empty').exists(),
            ]   
         }
     }
