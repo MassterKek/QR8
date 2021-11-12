@@ -54,6 +54,17 @@ const parseCovidRes = (covid_res) => {
         return positive_cases;
     }
     return 0;
+};
+
+const parseOrderBy = (orderBy) => {
+    switch (orderBy) {
+        case "date_start":
+            return "e.date_start";
+        case "covid_cases":
+            return "c.covid_cases";
+        default:
+            return "e.date_start";
+    }
 }
 
-module.exports = { isValidResponse, getValues, parseDate, parseAddress, getCovidValues, parseCovidRes };
+module.exports = { isValidResponse, getValues, parseDate, parseAddress, getCovidValues, parseCovidRes, parseOrderBy };

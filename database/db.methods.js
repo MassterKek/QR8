@@ -32,8 +32,8 @@ const selectEvent = (values) => {
     return pool.query('SELECT * FROM EVENTS WHERE query_id = (SELECT ID FROM QUERY WHERE q = $1 AND loc = $2)', values);
 }
 
-const selectEventsByQueryId = (values) => {
-    return pool.query('SELECT * FROM EVENTS e LEFT JOIN COVID_DATA c ON e.id = c.event_id WHERE e.query_id = $1', values);
+const selectEventsByQueryId = (values, orderBy) => {
+    return pool.query(`SELECT * FROM EVENTS e LEFT JOIN COVID_DATA c ON e.id = c.event_id WHERE e.query_id = ${values[0]} ORDER BY ${orderBy} ASC`);
 }
 
 const truncateCovidData = () => {
