@@ -13,6 +13,8 @@ const month = {
     'Dec': '12'
 };
 
+const EVENT_PAGE_STEPS = [0, 20, 30, 40];
+
 const isValidResponse = (event) => {
     if ('title' in event && 'description' in event && 'date' in event 
         && 'address' in event && 'venue' in event && 'thumbnail' in event) {
@@ -40,9 +42,7 @@ const parseDate = (eventDate) => {
 }
 
 const parseAddress = (address) => {
-    let parsed = address.split(',');
-    parsed = parsed.map(string => string.trim())
-    return [parsed[parsed.length - 3], parsed[parsed.length - 2], parsed[parsed.length - 1]]
+    return address.split(/(.+?), (\d+[^,]+), ([a-zA-Z]+), ([A-Z]{2})/);
 };
 
 const parseCovidRes = (covid_res) => {
@@ -67,4 +67,4 @@ const parseOrderBy = (orderBy) => {
     }
 }
 
-module.exports = { isValidResponse, getValues, parseDate, parseAddress, getCovidValues, parseCovidRes, parseOrderBy };
+module.exports = { isValidResponse, getValues, parseDate, parseAddress, getCovidValues, parseCovidRes, parseOrderBy, EVENT_PAGE_STEPS };
