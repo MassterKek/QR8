@@ -18,15 +18,13 @@ const updateAllSavedQueries = (request, response, next) => {
         const search = new SerpApi.GoogleSearch(process.env.EVENTS_API_KEY);
         truncateEvents();
         Array.prototype.forEach.call(results.rows, (query) => {
-            for (let page_offset = 0; page_offset < constants.EVENT_PAGES; page_offset++) {
-                const params = {
-                    'q': query.q,
-                    'location': query.loc,
-                    'engine': constants.ENGINE,
-                    'start': page_offset,
-                };
-                search.json(params, (data) => searchAllCallback(data, query.id));
-            }
+            const params = {
+                'q': query.q,
+                'location': query.loc,
+                'engine': constants.ENGINE,
+                'num': constants.EVENT_RESULTS,
+            };
+            search.json(params, (data) => searchAllCallback(data, query.id));
         });
         response.status(200).json({ status: 'success', message: 'events fetched' });
     }).catch((error) => {

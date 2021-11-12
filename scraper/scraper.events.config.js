@@ -5,5 +5,5 @@ module.exports = {
     YADDRESS_URL: 'https://www.yaddress.net/api/address',
     COVID_DATA_URL: 'https://localcoviddata.com/covid19/v1/locations?zipCode=',
     ENGINE: 'google_events',
-    EVENT_PAGES: 2,
+    EVENT_RESULTS: 20,
 }
