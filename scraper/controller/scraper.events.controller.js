@@ -1,8 +1,8 @@
 require('dotenv').config();
 const constants = require('../scraper.events.config');
 const SerpApi = require('google-search-results-nodejs');
-const { selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery, insertCovidData } = require('../../database/db.methods');
-const { isValidResponse, getValues, getCovidValues, parseAddress, parseCovidRes, parseOrderBy } = require('../scraper.utils');
+const { selectEventByTitle, selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery, insertCovidData, truncateCovidData } = require('../../database/db.methods');
+const { isValidResponse, getValues, getCovidValues, parseAddress, parseCovidRes, parseOrderBy, EVENT_PAGE_STEPS } = require('../scraper.utils');
 const { validationResult } = require('express-validator');
 const { body } = require('express-validator');
 const axios = require('axios');
@@ -17,12 +17,12 @@ const updateAllSavedQueries = (request, response, next) => {
     .then(results => {
         const search = new SerpApi.GoogleSearch(process.env.EVENTS_API_KEY);
         truncateEvents();
+        truncateCovidData();
         Array.prototype.forEach.call(results.rows, (query) => {
             const params = {
                 'q': query.q,
                 'location': query.loc,
                 'engine': constants.ENGINE,
-                'num': constants.EVENT_RESULTS,
             };
             search.json(params, (data) => searchAllCallback(data, query.id));
         });
@@ -34,23 +34,32 @@ const updateAllSavedQueries = (request, response, next) => {
 
 // Saves every received event for scecific query_id in database
 const searchAllCallback = function(data, query_id) {
-    try {
-        if (data.search_metadata.status == 'Success') {
-            Array.prototype.forEach.call(data.events_results, (event) => {
-                if (isValidResponse(event)) {
-                    const values = getValues(event, query_id);
-                    insertEvent(values).then((events) => {
-                        if (events.rows.length > 0) {
-                            const address = parseAddress(values[4]);
-                            getExtendedEventInfo(events.rows[0].id, address);
-                        }
-                    });
-                }
-            });
-        }
-    } catch (error) {
-        throw error;
-    };
+    if (data.search_metadata.status == 'Success') {
+        Array.prototype.forEach.call(data.events_results, (event) => {
+            if (isValidResponse(event)) {
+                const values = getValues(event, query_id);
+                selectEventByTitle([values[0]]).then((existing_events) => {
+                    if (existing_events.rows.length == 0) {
+                        insertEvent(values).then((events) => {
+                            if (events.rows.length > 0) {
+                                const address = parseAddress(values[4]);
+                                getExtendedEventInfo(events.rows[0].id, address);
+                            }
+                        }).catch((error) => {
+                            console.log(error);
+                            console.log("error inserting event");
+                        })
+                    }
+                }).catch((error) => {
+                    console.log(error);
+                    console.log("error selecting event by title");
+                })
+                
+            }
+        });
+    } else {
+        console.log("error");
+    }
 };
 
 // Get extended address information for event and get covid data for event using it's zipcode
@@ -58,12 +67,13 @@ const getExtendedEventInfo = async (event_id, eventAddress) => {
     axios({
         method: 'get',
         url: constants.YADDRESS_URL,
-        params: {'AddressLine1': `${eventAddress[0]}`, 'AddressLine2': `${eventAddress[1]}, ${eventAddress[2]}`},
+        params: {'AddressLine1': `${eventAddress[2]}`, 'AddressLine2': `${eventAddress[3]}, ${eventAddress[4]}`},
         headers: {'Accept': 'application/json'}
     }).then((addr_res) => {
         getCovidDataForEvent(event_id, addr_res);
     }).catch((error) => {
         console.log(error.message);
+        console.log('failed at getting address');
     });
 };
 
@@ -80,6 +90,7 @@ const getCovidDataForEvent = async (event_id, addr_res) => {
             insertCovidData(values);
         }).catch((error) => {
             console.log(error.message);
+            console.log('failed at getting covid data');
         })
     }
 };
