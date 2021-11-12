@@ -45,4 +45,15 @@ const parseAddress = (address) => {
     return [parsed[parsed.length - 3], parsed[parsed.length - 2], parsed[parsed.length - 1]]
 };
 
-module.exports = { isValidResponse, getValues, parseDate, parseAddress, getCovidValues };
+const parseCovidRes = (covid_res) => {
+    if (covid_res && covid_res.data && covid_res.data.counties) {
+        let positive_cases = 0;
+        covid_res.data.counties.forEach(county => {
+            positive_cases += county.positiveCt;
+        });
+        return positive_cases;
+    }
+    return 0;
+}
+
+module.exports = { isValidResponse, getValues, parseDate, parseAddress, getCovidValues, parseCovidRes };
