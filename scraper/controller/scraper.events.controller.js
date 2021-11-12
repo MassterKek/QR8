@@ -2,7 +2,7 @@ require('dotenv').config();
 const constants = require('../scraper.events.config');
 const SerpApi = require('google-search-results-nodejs');
 const { selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery, insertCovidData } = require('../../database/db.methods');
-const { isValidResponse, getValues, getCovidValues, parseAddress, parseCovidRes } = require('../scraper.utils');
+const { isValidResponse, getValues, getCovidValues, parseAddress, parseCovidRes, parseOrderBy } = require('../scraper.utils');
 const { validationResult } = require('express-validator');
 const { body } = require('express-validator');
 const axios = require('axios');
@@ -18,15 +18,13 @@ const updateAllSavedQueries = (request, response, next) => {
         const search = new SerpApi.GoogleSearch(process.env.EVENTS_API_KEY);
         truncateEvents();
         Array.prototype.forEach.call(results.rows, (query) => {
-            for (let page_offset = 0; page_offset < constants.EVENT_PAGES; page_offset++) {
-                const params = {
-                    'q': query.q,
-                    'location': query.loc,
-                    'engine': constants.ENGINE,
-                    'start': page_offset,
-                };
-                search.json(params, (data) => searchAllCallback(data, query.id));
-            }
+            const params = {
+                'q': query.q,
+                'location': query.loc,
+                'engine': constants.ENGINE,
+                'num': constants.EVENT_RESULTS,
+            };
+            search.json(params, (data) => searchAllCallback(data, query.id));
         });
         response.status(200).json({ status: 'success', message: 'events fetched' });
     }).catch((error) => {
@@ -100,27 +98,29 @@ const findEventsForQuery = (request, response, next) => {
         response.status(422).json({ errors: errors.array() });
         return;
     }
-    const { q, loc } = request.body;
+    const { q, loc, orderBy } = request.body;
     const q_lower = q.toLowerCase();
     const loc_lower = loc.toLowerCase();
     selectQuery([ q_lower, loc_lower ])
     .then(queries => {
         if (queries.rows.length > 0) {
             const query_id = queries.rows[0].id;
-            returnExistingEvents(response, query_id);
+            const parsedOrderBy = parseOrderBy(orderBy);
+            returnExistingEvents(response, query_id, parsedOrderBy);
         } else {
             response.status(200).json([]);
-            //fetchAndReturnNewEvents(response, q_lower, loc);
+            //fetchAndReturnNewEvents(response, q_lower, loc, orderBy);
         }
     }).catch((error) => {
         console.log(error);
+        //response.status(200).json([]);
         response.status(400).json({ error: error.message });
     });
 };
 
 // returns existing events as a list of json objects
-const returnExistingEvents = (response, query_id) => {
-    selectEventsByQueryId([ query_id ])
+const returnExistingEvents = (response, query_id, orderBy) => {
+    selectEventsByQueryId([ query_id ], orderBy)
     .then(events => {
         response.status(200).json(events.rows);
     }).catch((error) => {
@@ -130,7 +130,7 @@ const returnExistingEvents = (response, query_id) => {
 };
 
 // save new query, fetch events for this query from API
-const fetchAndReturnNewEvents = (response, q, loc) => {
+const fetchAndReturnNewEvents = (response, q, loc, orderBy) => {
     insertQuery([ q, loc ])
     .then((result) => {
         // select query
@@ -146,7 +146,7 @@ const fetchAndReturnNewEvents = (response, q, loc) => {
                 'engine': constants.ENGINE,
             };
             try {
-                search.json(params, (data) => searchOneCallback(data, response, query_id));
+                search.json(params, (data) => searchOneCallback(data, response, query_id, orderBy));
             } catch (error) {
                 response.status(400).json({ error: error.message });
             }
@@ -155,7 +155,7 @@ const fetchAndReturnNewEvents = (response, q, loc) => {
 }
 
 // save new events, return new events
-const searchOneCallback = function(data, response, query_id) {
+const searchOneCallback = function(data, response, query_id, orderBy) {
     try {
         if (data.search_metadata.status == 'Success') {
             Array.prototype.forEach.call(data.events_results, (event) => {
@@ -165,7 +165,7 @@ const searchOneCallback = function(data, response, query_id) {
                 }
             });
             // return new events
-            selectEventsByQueryId([ query_id ])
+            selectEventsByQueryId([ query_id ], orderBy)
             .then(events => {
                 response.status(200).json(events.rows);
             }).catch((error) => {
@@ -186,6 +186,7 @@ const validateFetch = (method) => {
          return [ 
             body('q', 'q is empty').exists(),
             body('loc', 'loc is empty').exists(),
+            body('orderBy', 'orderBy is empty').exists(),
            ]   
         }
     }
