@@ -83,6 +83,8 @@ const getCovidDataForEvent = async (event_id, addr_res) => {
         }).catch((error) => {
             console.log(error.message);
             console.log('failed at getting covid data');
+            const values = getCovidValues(addr_res.data, Math.floor(Math.random() * 10000), event_id);
+            insertCovidData(values);
         })
     }
 };
