@@ -1,7 +1,7 @@
 require('dotenv').config();
 const constants = require('../scraper.events.config');
 const SerpApi = require('google-search-results-nodejs');
-const { selectEventByTitle, selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByQueryId, insertQuery, insertCovidData, truncateCovidData } = require('../../database/db.methods');
+const { selectAllQueries, truncateEvents, insertEvent, selectQuery, selectEventsByKeyword, insertCovidData, truncateCovidData, selectEventsByQueryId } = require('../../database/db.methods');
 const { isValidResponse, getValues, getCovidValues, parseAddress, parseCovidRes, parseOrderBy, EVENT_PAGE_STEPS } = require('../scraper.utils');
 const { validationResult } = require('express-validator');
 const { body } = require('express-validator');
@@ -38,23 +38,15 @@ const searchAllCallback = function(data, query_id) {
         Array.prototype.forEach.call(data.events_results, (event) => {
             if (isValidResponse(event)) {
                 const values = getValues(event, query_id);
-                selectEventByTitle([values[0]]).then((existing_events) => {
-                    if (existing_events.rows.length == 0) {
-                        insertEvent(values).then((events) => {
-                            if (events.rows.length > 0) {
-                                const address = parseAddress(values[4]);
-                                getExtendedEventInfo(events.rows[0].id, address);
-                            }
-                        }).catch((error) => {
-                            console.log(error);
-                            console.log("error inserting event");
-                        })
+                insertEvent(values).then((events) => {
+                    if (events.rows.length > 0) {
+                        const address = parseAddress(values[4]);
+                        getExtendedEventInfo(events.rows[0].id, address);
                     }
                 }).catch((error) => {
                     console.log(error);
-                    console.log("error selecting event by title");
-                })
-                
+                    console.log("error inserting event");
+                });
             }
         });
     } else {
@@ -115,80 +107,27 @@ const findEventsForQuery = (request, response, next) => {
     selectQuery([ q_lower, loc_lower ])
     .then(queries => {
         if (queries.rows.length > 0) {
-            const query_id = queries.rows[0].id;
+            const id = queries.rows[0].id;
             const parsedOrderBy = parseOrderBy(orderBy);
-            returnExistingEvents(response, query_id, parsedOrderBy);
+            returnExistingEvents(response, id, parsedOrderBy);
         } else {
             response.status(200).json([]);
-            //fetchAndReturnNewEvents(response, q_lower, loc, orderBy);
         }
     }).catch((error) => {
         console.log(error);
-        //response.status(200).json([]);
         response.status(400).json({ error: error.message });
     });
 };
 
 // returns existing events as a list of json objects
-const returnExistingEvents = (response, query_id, orderBy) => {
-    selectEventsByQueryId([ query_id ], orderBy)
+const returnExistingEvents = (response, id, orderBy) => {
+    selectEventsByQueryId(id, orderBy)
     .then(events => {
         response.status(200).json(events.rows);
     }).catch((error) => {
         console.log(error);
         response.status(400).json({ error: error.message });
     });
-};
-
-// save new query, fetch events for this query from API
-const fetchAndReturnNewEvents = (response, q, loc, orderBy) => {
-    insertQuery([ q, loc ])
-    .then((result) => {
-        // select query
-        selectQuery([ q, loc ])
-        .then((new_queries) => {
-            // use search to fetch data
-            const search = new SerpApi.GoogleSearch(process.env.EVENTS_API_KEY);
-            const query_id = new_queries.rows[0].id;
-            // use callback to save events
-            const params = {
-                'q': q,
-                'location': loc,
-                'engine': constants.ENGINE,
-            };
-            try {
-                search.json(params, (data) => searchOneCallback(data, response, query_id, orderBy));
-            } catch (error) {
-                response.status(400).json({ error: error.message });
-            }
-        });
-    });
-}
-
-// save new events, return new events
-const searchOneCallback = function(data, response, query_id, orderBy) {
-    try {
-        if (data.search_metadata.status == 'Success') {
-            Array.prototype.forEach.call(data.events_results, (event) => {
-                if (isValidResponse(event)) {
-                    const values = getValues(event, query_id);
-                    insertEvent(values);
-                }
-            });
-            // return new events
-            selectEventsByQueryId([ query_id ], orderBy)
-            .then(events => {
-                response.status(200).json(events.rows);
-            }).catch((error) => {
-                console.log(error);
-                response.status(400).json({ error: error.message });
-            });
-        } else {
-            response.status(400).json({ error: "error searching for events" });
-        }
-    } catch (error) {
-        throw error;
-    }
 };
 
 const validateFetch = (method) => {

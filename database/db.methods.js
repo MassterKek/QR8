@@ -32,12 +32,18 @@ const selectEvent = (values) => {
     return pool.query('SELECT * FROM EVENTS WHERE query_id = (SELECT ID FROM QUERY WHERE q = $1 AND loc = $2)', values);
 }
 
-const selectEventByTitle = (values) => {
-    return pool.query('SELECT * FROM EVENTS WHERE title = $1', values);
+const selectEventByTitle = (title) => {
+    return pool.query(`SELECT * FROM EVENTS WHERE title LIKE %${title}% OR description LIKE `)
 }
 
-const selectEventsByQueryId = (values, orderBy) => {
-    return pool.query(`SELECT * FROM EVENTS e LEFT JOIN COVID_DATA c ON e.id = c.event_id WHERE e.query_id = ${values[0]} ORDER BY ${orderBy} ASC`);
+
+const selectEventsByQueryId = (id, orderBy) => {
+    return pool.query(`SELECT * FROM EVENTS e LEFT JOIN COVID_DATA c ON e.id = c.event_id WHERE e.query_id = ${id} ORDER BY ${orderBy} ASC`);
+}
+
+
+const selectEventsByKeyword = (title, orderBy) => {
+    return pool.query(`SELECT * FROM EVENTS e LEFT JOIN COVID_DATA c ON e.id = c.event_id WHERE e.title LIKE '%${title}%' OR e.description LIKE '%${title}%' ORDER BY ${orderBy} ASC`);
 }
 
 const truncateCovidData = () => {
@@ -55,4 +61,4 @@ const insertCovidData = (values) => {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`, values);
 }
 
-module.exports = { selectAllQueries, selectQuery, insertQuery, deleteQuery, selectAllEvents, insertEvent, selectEvent, selectEventsByQueryId, truncateEvents, insertCovidData, truncateCovidData, selectEventByTitle };
+module.exports = { selectEventsByQueryId, selectAllQueries, selectQuery, insertQuery, deleteQuery, selectAllEvents, insertEvent, selectEvent, selectEventsByKeyword, truncateEvents, insertCovidData, truncateCovidData };
