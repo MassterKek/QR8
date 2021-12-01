@@ -1,30 +1,43 @@
 <nav class="card col-sm-2 d-none d-xl-block bg-light sidebar">
-    <div>
-        <h2 class="card-title">Filters:</h1>
-        <form>
-            <h4>Distance:</h4>
-            <div class="distance input-group d-flex flex-row align-items-center py-2">
-                <input type="number" aria-label="min" min=0 placeholder="min..." class="form-control">
-                <label class="px-1">to</label>
-                <input type="number" aria-label="max" min=0 placeholder="max..." class="form-control">
-                 <label class="px-1">miles</label>
-            </div>
-            <div class="covid form-group py-2">
-                <h4>COVID-19 Rate:</h4>
-                <select class="form-control" id="covid">
-                    <option>Low</option>
-                    <option>Average</option>
-                    <option>High</option>
-                </select>
-            </div>
-            <div class="date form-row row-cols-1 py-2">
-                <h4>Date:</h4>
-                <h6>Before:</h6>
-                <input type="date" id="before">
-                <h6>After:</h6>
-                <input type="date" id="after">
-            </div>
-            <button type="submit" class="btn btn-primary my-3">Submit</button>
-        </form>
+    <div class="card mt-4">
+        <div class="card-header">
+            Event Search Filters
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="form-group">
+                    <label class="sr-only" for="covidGroup">Covid Rate: </label>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <div class="input-group-text">cases</div>
+                        </div>
+                        <select class="form-control" name="covid" id="covidGroup">
+                            <option>Low</option>
+                            <option>Average</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="distanceGroup">Distance: </label>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <div class="input-group-text">miles</div>
+                        </div>
+                        <input type="number" class="form-control" id="distanceGroup" placeholder="10">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="dateGroup">Date: </label>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <div class="input-group-text">before</div>
+                        </div>
+                        <input type="date" id="start" name="trip-start"
+                            value="2021-12-01" min="2021-01-01" max="2022-01-01">
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </nav>

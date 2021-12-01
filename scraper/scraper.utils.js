@@ -25,9 +25,9 @@ const isValidResponse = (event) => {
 
 const getValues = (event, query_id) => {
     let full_address = `${event.address[0]}, ${event.address[1]}`
-    return [event.title, event.description, parseDate(event.date.start_date), event.date.when, 
-        full_address, event.venue.name, event.venue.rating, event.venue.reviews, 
-        event.thumbnail, query_id];
+        return [event.title, event.description, parseDate(event.date.start_date), event.date.when, 
+            full_address, event.venue.name, event.venue.rating, event.venue.reviews, 
+            event.thumbnail, query_id];
 }
 
 const getCovidValues = (address, covid_data, event_id) => {

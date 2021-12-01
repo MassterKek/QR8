@@ -1,17 +1,19 @@
 <div class="col-md-4">
-    <div class="card mb-4 box-shadow">
-        <img class="card-img-top" alt="Thumbnail [100%x225]" src={{thumbnail}} data-holder-rendered="true">
+    <div class="card mb-4 box-shadow" >
+        <div class="card-header">{{title}}</div>
+        <img class="card-img-top" alt="Thumbnail [100%x225]" src={{thumbnail}} data-holder-rendered="true" style="max-height:400px;">
         <div class="card-body">
-        <p class="card-text">{{title}}</p>
-        <p class="card-text">{{date_start}}</p>
-        <p class="card-text">{{venue_name}}</p>
-        <p class="card-text">COVID-19 Rate: {{covid_cases}}</p>
-        <!--<p class="card-text">Weather: {{weather}}</p>-->
-        <div class="d-flex justify-content-end align-items-center">
-            <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><b>Date:</b> {{date_when}}</li>
+                <li class="list-group-item"><b>Address:</b> {{address_line_one}}, {{address_line_two}}</li>
+                <li class="list-group-item"><b>Description:</b> {{description}}</li>
+            </ul>
         </div>
+        <div class="card-footer text-muted">
+               <b>Event Rating:</b> {{venue_rating}}
+        </div>
+        <div class="card-footer text-muted">
+                <b>Confirmed COVID-19 Cases:</b> {{covid_cases}}
         </div>
     </div>
 </div>
