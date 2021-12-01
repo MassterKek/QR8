@@ -35,14 +35,16 @@ const updateAllSavedQueries = (request, response, next) => {
 // Saves every received event for scecific query_id in database
 const searchAllCallback = function(data, query_id, q) {
     if (data.search_metadata.status == 'Success') {
-        let count = 0;
-        Array.prototype.forEach.call(data.events_results, (event) => {
-            if (isValidResponse(event)) {
-                let values = getValues(event, query_id);
-                getImage(values, q, count);
-                count++;
-            }
-        });
+        if (data.events_results) {
+            let count = 0;
+            Array.prototype.forEach.call(data.events_results, (event) => {
+                if (isValidResponse(event)) {
+                    let values = getValues(event, query_id);
+                    getImage(values, q, count);
+                    count++;
+                }
+            });
+        }
     } else {
         console.log("error");
     }
