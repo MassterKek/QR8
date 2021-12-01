@@ -24,7 +24,7 @@ const updateAllSavedQueries = (request, response, next) => {
                 'location': query.loc,
                 'engine': constants.ENGINE,
             };
-            search.json(params, (data) => searchAllCallback(data, query.id));
+            search.json(params, (data) => searchAllCallback(data, query.id, query.q));
         });
         response.status(200).json({ status: 'success', message: 'events fetched' });
     }).catch((error) => {
@@ -33,26 +33,46 @@ const updateAllSavedQueries = (request, response, next) => {
 };
 
 // Saves every received event for scecific query_id in database
-const searchAllCallback = function(data, query_id) {
+const searchAllCallback = function(data, query_id, q) {
     if (data.search_metadata.status == 'Success') {
-        Array.prototype.forEach.call(data.events_results, (event) => {
-            if (isValidResponse(event)) {
-                const values = getValues(event, query_id);
-                insertEvent(values).then((events) => {
-                    if (events.rows.length > 0) {
-                        const address = parseAddress(values[4]);
-                        getExtendedEventInfo(events.rows[0].id, address);
-                    }
-                }).catch((error) => {
-                    console.log(error);
-                    console.log("error inserting event");
-                });
-            }
-        });
+        if (data.events_results) {
+            let count = 0;
+            Array.prototype.forEach.call(data.events_results, (event) => {
+                if (isValidResponse(event)) {
+                    let values = getValues(event, query_id);
+                    getImage(values, q, count);
+                    count++;
+                }
+            });
+        }
     } else {
         console.log("error");
     }
 };
+
+const getImage = async (values, q, count) => {
+    axios({
+        method: 'get',
+        url: `https://api.unsplash.com/search/photos?page=1&query=${q}&client_id=${constants.IMAGES_API_KEY}`,
+        headers: {'Accept': 'application/json'}
+    }).then((image) => {
+        if (count < image.data.results.length) {
+            values[8] = image.data.results[count].urls.small;
+        }
+        insertEvent(values).then((events) => {
+            if (events.rows.length > 0) {
+                const address = parseAddress(values[4]);
+                getExtendedEventInfo(events.rows[0].id, address);
+            }
+        }).catch((error) => {
+            console.log(error);
+            console.log("error inserting event");
+        }); 
+    }).catch((error) => {
+        console.log("error getting image data")
+        console.log(error)
+    });
+}
 
 // Get extended address information for event and get covid data for event using it's zipcode
 const getExtendedEventInfo = async (event_id, eventAddress) => {
